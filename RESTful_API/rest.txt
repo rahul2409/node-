@@ -1,1 +1,17 @@
-One of the most popular types of API is REST or, as they're sometimes known,RESTful APIs. REST or RESTful APIs were designed to take advantage of existing protocols. While REST - or Representational State Transfer - can be used over nearly any protocol, when used for web APIs it typically takes advantage of HTTP.
+One of the most popular types of+AKA-API+AKA-is+AKA-REST+AKA-or, as they're sometimes known,RESTful APIs.+AKA-REST+AKA-or+AKA-RESTful APIs+AKA-were designed to take advantage of existing protocols. While+AKA-REST+AKA-- or Representational State Transfer - can be used over nearly any protocol, when used for web+AKA-APIs+AKA-it typically takes advantage of HTTP.
+
+Requirements 
+(In this directory we are building a RESTful API for uptime monitoring applications )
++MAAwADAA-What is uptime monitoring application ?
+-+AD4-	an +IBw-uptime monitor+IB0- allows the user to enter the URLs they want monitored and receive 	alerts when those resources +IBw-go down+IB0- or +IBw-come back up+IB0- .
++MAAwADAA-This will be dealt by popping SMS alerts on the user+IBk-s entered mobile numbers.
+STEPS TO BE DONE :-
++8Gw-The API listens on a PORT and accepts the incoming HTTP request such as POST,GET,PUT,DELETE and HEAD .
++8Gw-The API allows thee client to connect, then create the user and also allows to edit the user and delete it .
++8Gw-The PI allows a user to sign in which gives them a subsequent token that they can use to for authenticated subsequent request .
++8Gw-The API also allows the user to +IBw-sign out+IB0- which invalidates their token . 
++8Gw-The API allows a user to use their token to create a new +IBw-check+IB0-(meaning of check is simply mark the URL they want to monitor. Also help the API define what up or down for the particular website mean. )
++8Gw-The signed in user can edit or delete any of the checks (limit the checks to 5). 
++8Gw-In the background , workers perform all the checks at appropriate times and send alerts to user when the check changes it state from u to down or vice versa .
+
+The messages ( SMS ) will be send using the twilio API.
