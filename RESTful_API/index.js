@@ -20,11 +20,20 @@ var server = http.createServer(function(req,res){
     // This path is filled with '/' and '+' signs these are removed by writing a regex 
     var trimmedPath= path.replace(/^\/+|\/+$/g,'');
 
+    // Get the query string as an object 
+    var queryStringObject = parsedURL.query;
+    // var queryStringObject = parsedURL.query; This is written only due to the true passed in the parsedURL variable the true implicitly invokes the query method of node 
+
+    // Get the HTTP methods 
+    // The req object passed in the function has an attribute which gives the HTTP method used 
+    var method = req.method.toLowerCase();
+    //lowercase is called to make a uniform lowercase pattern 
+
     // Send the response 
     res.end('hello World ! \n');
 
     // Log the request path 
-    console.log('Request received on path: '+trimmedPath);
+    console.log('Request received on path: '+trimmedPath+' with the method '+method+' and with these query parameters ',queryStringObject);
 
 });
 
