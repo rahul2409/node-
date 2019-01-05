@@ -29,11 +29,14 @@ var server = http.createServer(function(req,res){
     var method = req.method.toLowerCase();
     //lowercase is called to make a uniform lowercase pattern 
 
+    // Get the headers as an object 
+    var headers = req.headers;
+
     // Send the response 
     res.end('hello World ! \n');
 
     // Log the request path 
-    console.log('Request received on path: '+trimmedPath+' with the method '+method+' and with these query parameters ',queryStringObject);
+    console.log('Request received with these headers: ',headers);
 
 });
 
@@ -41,3 +44,5 @@ var server = http.createServer(function(req,res){
 server.listen(3000,function(){
     console.log("server is up and running on port 3000 ");
 });
+
+// for putting manual headers used the mod headers extension of the chrome library 
