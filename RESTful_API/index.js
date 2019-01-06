@@ -45,11 +45,37 @@ var server = http.createServer(function(req,res){
     req.on('end',function(){
         buffer += decoder.end();
 
-        // Send the response 
-        res.end('hello World ! \n');
+        var chosenHandler = typeof(router[trimmedPath])!=='undefined'?router[trimmedPath]:handlers.notfound;
 
-        // Log the request path 
-        console.log('Request received with this payloads is: ',buffer);
+        // now creating the data object to be passed 
+        var data = {
+            'trimmedPath' : trimmedPath,
+            'queryStringObject' : queryStringObject,
+            'method' : method ,
+            'headers' : headers,
+            'payload' : buffer
+        };
+
+        // define the chosen handler function 
+        // route the request to the handler specified in the router 
+        chosenHandler(data,function(statusCode,payload){
+            // use the status code provided by the object handler or the default status code as 200
+            statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
+
+            // use the payload provided by the callback function or the dafault paylaod as an empty string 
+            payload = typeof(payload) == 'object' ? payload : {}; 
+
+            // define the default payload data type as string 
+            var payloadString = JSON.stringify(payload);
+            
+            // Returning the response 
+            res.writeHead(statusCode);
+            res.end(payloadString);
+                
+            // Log the request path 
+            console.log('Returning this response ',statusCode,payloadString);
+            
+        })
 
     });
 });
