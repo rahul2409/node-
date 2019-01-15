@@ -9,6 +9,7 @@ var http = require('http');
 // For getting the url you need the URL module of node 
 var url = require('url');
 var StringDecoder = require('string_decoder').StringDecoder;
+var config = require('./config');
 
 
 // The server should respond to all the request with a string
@@ -69,20 +70,23 @@ var server = http.createServer(function(req,res){
             var payloadString = JSON.stringify(payload);
             
             // Returning the response 
+            res.setHeader('Content-Type','application/json');
+            // the above statement is written so tha the browser can understand the response is json reponse and not a plain text
             res.writeHead(statusCode);
             res.end(payloadString);
                 
             // Log the request path 
             console.log('Returning this response ',statusCode,payloadString);
-            
+
         })
 
     });
 });
 
-// Start the server , and have a listen on port 3000 
-server.listen(3000,function(){
-    console.log("server is up and running on port 3000 ");
+// Start the server 
+server.listen(config.port,function(){
+    // console.log(config);
+    console.log("server is up and running on port "+config.port+" in "+config.envName+" mode .");
 });
 
 // for putting manual headers used the mod headers extension of the chrome library 
