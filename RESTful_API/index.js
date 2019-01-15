@@ -5,6 +5,9 @@
 *
 */
 
+
+
+
 // Dependencies 
 var http = require('http');
 var https = require('https');
@@ -13,6 +16,16 @@ var url = require('url');
 var StringDecoder = require('string_decoder').StringDecoder;
 var config = require('./config');
 var fs = require('fs');
+var _data = require('./lib/data')
+
+
+//TESTING 
+// @TODO delete this 
+_data.create('test','newFile',{'foo' : 'bar'},function(err){
+    console.log('this was the error ', err);
+});
+
+
 
 // The server should respond to all the request with a string
 // Instantiating a server 
@@ -130,7 +143,7 @@ handlers.ping =function(data, callback){
 handlers.notfound= function(data,callback){
     // Call back the not found status code 
     callback(404);
-}
+};
 // you need a router object to parse a particular URL and make api more responsve 
 var router = {
     // define the handler variable 
