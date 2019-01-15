@@ -122,9 +122,9 @@ var unifiedServer = function(req,res){
 var handlers ={};
 
 // define the handler.sample method 
-handlers.sample=function(data, callback){
-    // Callback an http status code and a payload object 
-    callback(406,{'name' : 'sample-handler'});
+handlers.ping =function(data, callback){
+    // Callback an http status code of 200  
+    callback(200);
 };
 // define the non found handler 
 handlers.notfound= function(data,callback){
@@ -134,5 +134,5 @@ handlers.notfound= function(data,callback){
 // you need a router object to parse a particular URL and make api more responsve 
 var router = {
     // define the handler variable 
-    'sample' : handlers.sample
+    'ping' : handlers.ping
 };
