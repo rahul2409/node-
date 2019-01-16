@@ -16,8 +16,8 @@ var url = require('url');
 var StringDecoder = require('string_decoder').StringDecoder;
 var config = require('./config');
 var fs = require('fs');
-var _data = require('./lib/data')
-
+// var _data = require('./lib/data');
+var handlers = require ('./lib/handlers');
 
 //TESTING 
 // @TODO delete this 
@@ -131,19 +131,6 @@ var unifiedServer = function(req,res){
     });
 };
 
-// Define handler object 
-var handlers ={};
-
-// define the handler.sample method 
-handlers.ping =function(data, callback){
-    // Callback an http status code of 200  
-    callback(200);
-};
-// define the non found handler 
-handlers.notfound= function(data,callback){
-    // Call back the not found status code 
-    callback(404);
-};
 // you need a router object to parse a particular URL and make api more responsve 
 var router = {
     // define the handler variable 
