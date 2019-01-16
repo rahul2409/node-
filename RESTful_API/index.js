@@ -21,10 +21,10 @@ var _data = require('./lib/data')
 
 //TESTING 
 // @TODO delete this 
-_data.delete('test','newFile',function(err){
+/*_data.delete('test','newFile',function(err){
     console.log('this was the error ', err);
 });
-
+*/
 
 
 // The server should respond to all the request with a string
