@@ -86,7 +86,17 @@ lib.update = function(dir,file,data,callback){
     });
 };
 
-
+// Deleting the file 
+lib.delete = function(dir,file,callback){
+    // Unlink the file 
+    fs.unlink(lib.baseDir+dir+'/'+file+'.json',function(err){
+        if(!err){
+            callback(false);
+        } else {
+            callback('Deletion unsuccessful');
+        }
+    });
+};
 
 
 // Exporting the module 
