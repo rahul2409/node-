@@ -29,14 +29,16 @@ handlers._users ={};
 // Optional data : none 
 handlers._users.post = function(data,callback){
     // Check the required data
-    var firstName = typeof(data.payload.firstName) == 'string' && data.payload.firstName.trim().length > 0? data.payload.firstName.trim() : false ;
-    var lastName = typeof(data.payload.lastName) == 'string' && data.payload.lastName.trim().length > 0? data.payload.lastName.trim() : false ;
+    var payload = (data.payload);
+    // used for debugging console.log (payload);
+    var firstName = typeof(payload.firstName) == 'string' && payload.firstName.trim().length > 0? payload.firstName.trim() : false ;
+    var lastName = typeof(payload.lastName) == 'string' && payload.lastName.trim().length > 0? payload.lastName.trim() : false ;
     // Phone number is taken as string 
-    var phone = typeof(data.payload.phone) == 'string' && data.payload.phone.trim().length == 10? data.payload.phone.trim() : false ;
-    var password = typeof(data.payload.password) == 'string' && data.payload.password.trim().length >0?data.payload.password.trim() : false;
-    var tosAgreement = typeof(data.payload.tosAgreement) == 'boolean' && data.payload.tosAgreement == true ?true : false;
+    var phone = typeof(payload.phone) == 'string' && payload.phone.trim().length == 10? payload.phone.trim() : false ;
+    var password = typeof(payload.password) == 'string' && payload.password.trim().length >0?payload.password.trim() : false;
+    var tosAgreement = typeof(payload.tosAgreement) == 'boolean' && payload.tosAgreement == true ?true : false;
     // Because checking the liscense agreement is important 
-
+    // Testing : console.log(firstName,' ',lastName,' ',phone ,' ',password,' ',tosAgreement);
 
     if(firstName && lastName && phone && password && tosAgreement){
         // Make sure that the user does not exist 

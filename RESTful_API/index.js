@@ -14,7 +14,7 @@ var https = require('https');
 // For getting the url you need the URL module of node 
 var url = require('url');
 var StringDecoder = require('string_decoder').StringDecoder;
-var config = require('./config');
+var config = require('./lib/config');
 var fs = require('fs');
 // var _data = require('./lib/data');
 var handlers = require ('./lib/handlers');
@@ -72,7 +72,7 @@ var unifiedServer = function(req,res){
     var path = parsedURL.pathname ;
     // This path is filled with '/' and '+' signs these are removed by writing a regex 
     var trimmedPath= path.replace(/^\/+|\/+$/g,'');
-    console.log(trimmedPath);
+    // console.log(trimmedPath);
     // Get the query string as an object 
     var queryStringObject = parsedURL.query;
     // var queryStringObject = parsedURL.query; This is written only due to the true passed in the parsedURL variable the true implicitly invokes the query method of node 
@@ -105,12 +105,14 @@ var unifiedServer = function(req,res){
             'queryStringObject' : queryStringObject,
             'method' : method ,
             'headers' : headers,
-            'payload' : buffer
+            'payload' : helpers.parseJsonToObject(buffer)
         };
         // define the chosen handler function 
         // route the request to the handler specified in the router 
         chosenHandler(data,function(statusCode,payload){
             // use the status code provided by the handler or use the basic as 200
+            // used for debugging 
+            // console.log(data);
             statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
 
             // Use the payload called back by the handler or default as an empty object 
@@ -122,6 +124,7 @@ var unifiedServer = function(req,res){
             // Return the response 
             res.writeHead(statusCode);
             res.end(payloadString);
+            // console.log(res);
 
             // Logging the payloadString and the status code 
             console.log('Returning this response ',statusCode,payloadString); 

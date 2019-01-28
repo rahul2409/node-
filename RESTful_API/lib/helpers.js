@@ -6,16 +6,18 @@
 
 // Dependencies 
 var crypto = require ('crypto');
-var config = require('../config');
+var config = require('./config');
 
 // Container for the helpers object 
 var helpers = {};
 
 helpers.hash = function(str){
     // Use SHA256 for hashing the password 
+    // console.log(typeof(str));
     if(typeof(str) == 'string' && str.length>0){
         var hash = crypto.createHmac('sha256',config.hashingSecret).update(str).digest('hex');
-        // return hash ;
+        //console.log(hash);
+        return hash ;
     } else {
         return false ;
     }
