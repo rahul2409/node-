@@ -84,9 +84,27 @@ handlers._users.post = function(data,callback){
     }
 };
 
-// users= get 
+// users = get
+// Required Data : phone 
+// Optional data : none 
+// @TODO only let an authenticated user access its object don't let un authorized user to access the anyone else's object  
 handlers._users.get = function(data,callback){
-    
+    // Check whether the phone number is valid 
+    // The data object passed contains the queryStringObject alog side payload use this to get the phone number 
+    var phone = typeof(data.queryStringObject.phone) == 'string' && data.queryStringObject.phone.trim().length == 10 ? data.queryStringObject.phone.trim() : false ;
+    if (phone){
+        _data.read('users',phone,function(err,data){
+            if(!err && data){
+                // Remove the hash password before returning the value tothe user 
+                delete data.hashedPassword;
+                callback(200,data);
+            } else{
+                callback(404);
+            }
+        });
+    } else {
+        callback(400,{'Error': 'missing required phone number'});
+    }
 };
 
 // users= put 
