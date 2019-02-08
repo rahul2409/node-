@@ -161,8 +161,29 @@ handlers._users.put = function(data,callback){
 };
 
 // users= delete 
+// Required = phone 
+// @TODO Only an authenticated user can delete their object . Don't let them delete anyone else's object
+// @TODO Cleanup (delete) any other data files associated with this user 
 handlers._users.delete = function(data,callback){
-    
+    // Check whether the phone number is valid 
+    var phone = typeof(data.queryStringObject.phone) == 'string' && data.queryStringObject.phone.trim().length == 10 ? data.queryStringObject.phone.trim() : false ;
+    if (phone){
+        _data.read('users',phone,function(err,data){
+            if(!err && data){
+                _data.delete('users',phone,function(err){
+                    if(!err){
+                        callback(200);
+                    } else {
+                        callback(500,{'Error':'Could not delete the specified user'});
+                    }
+                });
+            } else{
+                callback(400, {'Error' : 'Could not find the specified user'});
+            }
+        });
+    } else {
+        callback(400,{'Error': 'missing required phone number'});
+    }
 };
 
 // define the handler.sample method 
