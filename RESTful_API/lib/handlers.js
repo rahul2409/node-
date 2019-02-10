@@ -197,5 +197,76 @@ handlers.notfound= function(data,callback){
     callback(404);
 };
 
+// Define tokens 
+handlers.tokens =function(data,callback){
+    var acceptableMethods = ['post','get','put','delete'];
+    if(acceptableMethods.indexOf(data.method) > -1){
+        handlers._tokens[data.method](data,callback);
+    } else {
+        callback(405);
+    }
+};
+
+// Build a container for all the tokens 
+handlers._tokens ={};
+
+// Tokens - post 
+// Required data: phone,password
+// Optional data: none 
+handlers._tokens.post = function(data,callback){
+    var payload = (data.payload);
+    var phone = typeof(payload.phone) == 'string' && payload.phone.trim().length == 10? payload.phone.trim() : false ;
+    var password = typeof(payload.password) == 'string' && payload.password.trim().length >0?payload.password.trim() : false;
+    if(phone && password){
+        // Lookup the user that matches that phone number
+        _data.read('users',phone,function(err,userData){
+            if(!err && userData){
+                // Hash the sent password and compare it with the password stored in the user object
+                var hashedPassword = helpers.hash(password);
+                if(hashedPassword == userData.hashedPassword){
+                    // If valid, create a new token with a random name. Set expiration date one hour in the future 
+                    var tokenId = helpers.createRandomString(20);
+                    var expires = Date.now() + 1000*60*60;
+                    var tokenObject = {
+                        'phone':phone,
+                        'id':tokenId,
+                        'expires':expires
+                    };
+
+                    // Store the token 
+                    _data.create('tokens',tokenId,tokenObject,function(err){
+                        if(!err){
+                            callback(200,tokenObject);
+                        } else {
+                            callback(500,{'Error' : 'Could not create the new token'});
+                        }
+                    });
+                } else {
+                    callback(400,{'Error': 'Password did not match the specified user\'s stored password'});
+                }
+            } else{
+                callback(400,{'Error': 'Could not find the specified user'});
+            }
+        });
+    } else{
+        callback(400,{'Error':'Missing required fields'});
+    }
+};
+
+// Tokens - get 
+handlers._tokens.get= function(data,callback){
+    
+};
+
+// Tokens - put 
+handlers._tokens.put = function(data,callback){
+    
+};
+
+// Tokens - delete 
+handlers._tokens.delete = function(data,callback){
+    
+};
+
 // export the module 
 module.exports = handlers;

@@ -6,8 +6,6 @@
 */
 
 
-
-
 // Dependencies 
 var http = require('http');
 var https = require('https');
@@ -138,4 +136,5 @@ var router = {
     // define the handler variable 
     'ping' : handlers.ping,
     'users' : handlers.users,
+    'tokens' :handlers.tokens
 };
