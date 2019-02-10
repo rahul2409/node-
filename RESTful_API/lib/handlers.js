@@ -255,7 +255,20 @@ handlers._tokens.post = function(data,callback){
 
 // Tokens - get 
 handlers._tokens.get= function(data,callback){
-    
+    // Check if id is valid 
+    var id = typeof(data.queryStringObject.id) == 'string' && data.queryStringObject.id.trim().length == 20 ? data.queryStringObject.id.trim() : false ;
+    if (id){
+        // Read the token 
+        _data.read('tokens',id,function(err,tokenData){
+            if(!err && tokenData){
+                callback(200,tokenData);
+            } else{
+                callback(404);
+            }
+        });
+    } else {
+        callback(400,{'Error': 'missing required phone number'});
+    }
 };
 
 // Tokens - put 
