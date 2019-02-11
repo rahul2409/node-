@@ -254,6 +254,8 @@ handlers._tokens.post = function(data,callback){
 };
 
 // Tokens - get 
+// Required -id 
+// Optional data - none 
 handlers._tokens.get= function(data,callback){
     // Check if id is valid 
     var id = typeof(data.queryStringObject.id) == 'string' && data.queryStringObject.id.trim().length == 20 ? data.queryStringObject.id.trim() : false ;
@@ -272,8 +274,38 @@ handlers._tokens.get= function(data,callback){
 };
 
 // Tokens - put 
+// Required data -id , extend 
 handlers._tokens.put = function(data,callback){
-    
+    var id = typeof(data.payload.id) == 'string' && data.payload.id.trim().length == 20 ? data.payload.id.trim() : false ;
+    var extend = typeof(data.payload.extend) == 'boolean' && data.payload.extend == true ? true : false ;
+    if(id && extend){
+        // Lookup the token 
+        _data.read('tokens',id,function(err,tokenData){
+            if(!err && tokenData){
+                // Check to make sure if the toke has not expired already 
+                if(tokenData.expires > Date.now()){
+                    // Now update the token expiration time 
+                    tokenData.expires = Date.now()+ 1000*60*60;
+                    
+                    // Now update the file 
+                    _data.update('tokens',id,tokenData,function(err){
+                        if(!err){
+                            callback(200);
+                        } else {
+                            callback(400,{'Error' : 'Could not update the token\'s expiration date successfully'});
+                        }
+                    }); 
+                } else {
+                    callback(400,{'Error' : 'The token cannnot be updated since it has already being expired '});
+                }
+            } else {
+                callback(400,{'Error':'The token specified does not exists'})
+            }
+        });
+    } else{
+        // Inavalid fields or missing fields 
+        callback(400, {'Error' : 'Missing required field(s) or field(s) have invalid value'});
+    }
 };
 
 // Tokens - delete 
