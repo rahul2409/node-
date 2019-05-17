@@ -38,8 +38,8 @@ handlers._users.post = function(data,callback){
     var password = typeof(payload.password) == 'string' && payload.password.trim().length >0?payload.password.trim() : false;
     var tosAgreement = typeof(payload.tosAgreement) == 'boolean' && payload.tosAgreement == true ?true : false;
     // Because checking the liscense agreement is important 
-    // Testing : console.log(firstName,' ',lastName,' ',phone ,' ',password,' ',tosAgreement);
-
+    // console.log(firstName,' ',lastName,' ',phone ,' ',password,' ',tosAgreement);
+    
     if(firstName && lastName && phone && password && tosAgreement){
         // Make sure that the user does not exist 
         _data.read('users',phone,function(err,data){
@@ -291,12 +291,12 @@ handlers._tokens.put = function(data,callback){
                     _data.update('tokens',id,tokenData,function(err){
                         if(!err){
                             callback(200);
-                        } else {
+                        } else { 
                             callback(400,{'Error' : 'Could not update the token\'s expiration date successfully'});
                         }
                     }); 
                 } else {
-                    callback(400,{'Error' : 'The token cannnot be updated since it has already being expired '});
+                    callback(400,{'Error' : 'missing required fields'});
                 }
             } else {
                 callback(400,{'Error':'The token specified does not exists'})
@@ -310,7 +310,24 @@ handlers._tokens.put = function(data,callback){
 
 // Tokens - delete 
 handlers._tokens.delete = function(data,callback){
-    
+    var id = typeof(data.queryStringObject.id) == 'string' && data.queryStringObject.id.trim().length == 20 ? data.queryStringObject.id.trim() : false ;
+    if (id){
+        _data.read('tokens',id,function(err,data){
+            if(!err && data){
+                _data.delete('tokens',id,function(err){
+                    if(!err){
+                        callback(200);
+                    } else {
+                        callback(500,{'Error':'Could not delete the specified token'});
+                    }
+                });
+            } else{
+                callback(400, {'Error' : 'Could not find the specified token'});
+            }
+        });
+    } else {
+        callback(400,{'Error': id});
+    }
 };
 
 // export the module 
