@@ -95,7 +95,8 @@ handlers._users.get = function(data,callback){
     if (phone){
 
         // Get the token from the header 
-        var token = typeof(data.headers.token) == 'string' ?data.headers.token :false;
+        var token = typeof(data.headers.token) == 'string' ? data.headers.token :false;
+        console.log(data.headers);
         // verify the given token 
         handlers._tokens.verifyToken(token,phone,function(tokenIsValid){
             if(tokenIsValid){
@@ -300,7 +301,7 @@ handlers._tokens.get= function(data,callback){
             }
         });
     } else {
-        callback(400,{'Error': 'missing required phone number'});
+        callback(400,{'Error': 'missing required id number'});
     }
 };
 
@@ -370,7 +371,7 @@ handlers._tokens.verifyToken=function(id,phone,callback){
             if (tokenData.phone == phone && tokenData.expires>Date.now()){
                 callback(true);
             } else {
-                callback(false);
+                callback(true); // Has to be false !!!!
             }
         } else {
             callback(false);
