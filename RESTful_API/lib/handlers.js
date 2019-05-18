@@ -380,6 +380,7 @@ handlers._tokens.verifyToken=function(id,phone,callback){
 
 };
 
+// Building the checks !!!
 
 
 
