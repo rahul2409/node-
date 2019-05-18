@@ -93,15 +93,26 @@ handlers._users.get = function(data,callback){
     // The data object passed contains the queryStringObject alog side payload use this to get the phone number 
     var phone = typeof(data.queryStringObject.phone) == 'string' && data.queryStringObject.phone.trim().length == 10 ? data.queryStringObject.phone.trim() : false ;
     if (phone){
-        _data.read('users',phone,function(err,data){
-            if(!err && data){
-                // Remove the hash password before returning the value tothe user 
-                delete data.hashedPassword;
-                callback(200,data);
-            } else{
-                callback(404);
+
+        // Get the token from the header 
+        var token = typeof(data.headers.token) == 'string' ?data.headers.token :false;
+        // verify the given token 
+        handlers._tokens.verifyToken(token,phone,function(tokenIsValid){
+            if(tokenIsValid){
+                _data.read('users',phone,function(err,data){
+                    if(!err && data){
+                        // Remove the hash password before returning the value tothe user 
+                        delete data.hashedPassword;
+                        callback(200,data);
+                    } else{
+                        callback(404);
+                    }
+                });
+            } else {
+                callback(403,{'Error':'required token is not passed in header or the token is invalid'});
             }
         });
+        
     } else {
         callback(400,{'Error': 'missing required phone number'});
     }
@@ -123,37 +134,47 @@ handlers._users.put = function(data,callback){
 
     // Error if phone is invalid 
     if(phone){
-        // Error if no optional fields are mentioned 
-        if(firstName || lastName || password){
-            // Lookup the user 
-            _data.read('users',phone,function(err,userData){
-                if(!err && userData){
-                    // Update the necessary fields 
-                    if(firstName){
-                        userData.firstName = firstName;
-                    }
-                    if(lastName){
-                        userData.lastName = lastName;
-                    }
-                    if(password){
-                        userData.hashedPassword = helpers.hash(password);
-                    }
-                    // Store the object 
-                    _data.update('users',phone,userData,function(err){
-                        if(!err){
-                            callback(200);
+        // Get the token from the header 
+        var token = typeof(data.headers.token) == 'string' ?data.headers.token :false;
+        // verify the given token 
+        handlers._tokens.verifyToken(token,phone,function(tokenIsValid){
+            if(tokenIsValid){
+                // Error if no optional fields are mentioned 
+                if(firstName || lastName || password){
+                    // Lookup the user 
+                    _data.read('users',phone,function(err,userData){
+                        if(!err && userData){
+                            // Update the necessary fields 
+                            if(firstName){
+                                userData.firstName = firstName;
+                            }
+                            if(lastName){
+                                userData.lastName = lastName;
+                            }
+                            if(password){
+                                userData.hashedPassword = helpers.hash(password);
+                            }
+                            // Store the object 
+                            _data.update('users',phone,userData,function(err){
+                                if(!err){
+                                    callback(200);
+                                } else {
+                                    console.log(err);
+                                    callback(500,{'Error' : 'Could not update the user'});
+                                }
+                            });
                         } else {
-                            console.log(err);
-                            callback(500,{'Error' : 'Could not update the user'});
+                            callback(400,{'Error':'Specified user does not exist'});
                         }
                     });
-                } else {
-                    callback(400,{'Error':'Specified user does not exist'});
-                }
-            });
-        } else{
-            callback(400,{'Error':'Missing required fields to update'});
-        }
+                } else{
+                    callback(400,{'Error':'Missing required fields to update'});
+                }        
+            } else {
+                callback(403,{'Error':'required token is not passed in header or the token is invalid'});
+            }
+        });
+        
     } else {
         callback(400,{'Error':'Missing required fields'});
     }
@@ -168,19 +189,29 @@ handlers._users.delete = function(data,callback){
     // Check whether the phone number is valid 
     var phone = typeof(data.queryStringObject.phone) == 'string' && data.queryStringObject.phone.trim().length == 10 ? data.queryStringObject.phone.trim() : false ;
     if (phone){
-        _data.read('users',phone,function(err,data){
-            if(!err && data){
-                _data.delete('users',phone,function(err){
-                    if(!err){
-                        callback(200);
-                    } else {
-                        callback(500,{'Error':'Could not delete the specified user'});
+        // Get the token from the header 
+        var token = typeof(data.headers.token) == 'string' ?data.headers.token :false;
+        // verify the given token 
+        handlers._tokens.verifyToken(token,phone,function(tokenIsValid){
+            if(tokenIsValid){        
+                _data.read('users',phone,function(err,data){
+                    if(!err && data){
+                        _data.delete('users',phone,function(err){
+                            if(!err){
+                                callback(200);
+                            } else {
+                                callback(500,{'Error':'Could not delete the specified user'});
+                            }
+                        });
+                    } else{
+                        callback(400, {'Error' : 'Could not find the specified user'});
                     }
-                });
-            } else{
-                callback(400, {'Error' : 'Could not find the specified user'});
+                });                
+            } else {
+                callback(403,{'Error':'required token is not passed in header or the token is invalid'});
             }
         });
+
     } else {
         callback(400,{'Error': 'missing required phone number'});
     }
@@ -329,6 +360,27 @@ handlers._tokens.delete = function(data,callback){
         callback(400,{'Error': id});
     }
 };
+
+// Verify if the token id is valid for a given user 
+handlers._tokens.verifyToken=function(id,phone,callback){
+    // Lookup the token 
+    _data.read('tokens',id,function(err,tokenData){
+        if (!err && tokenData){
+            // check that the token is for the valid user and also check that it has not been expired 
+            if (tokenData.phone == phone && tokenData.expires>Date.now()){
+                callback(true);
+            } else {
+                callback(false);
+            }
+        } else {
+            callback(false);
+        }
+    });
+
+};
+
+
+
 
 // export the module 
 module.exports = handlers;
