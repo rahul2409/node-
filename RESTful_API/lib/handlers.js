@@ -7,6 +7,7 @@
 // Dependencies 
 var _data = require('./data');
 var helpers = require('./helpers');
+var config= require('./config');
 
 // Define handler object 
 var handlers ={};
@@ -381,8 +382,98 @@ handlers._tokens.verifyToken=function(id,phone,callback){
 };
 
 // Building the checks !!!
+handlers.checks =function(data,callback){
+    var acceptableMethods = ['post','get','put','delete'];
+    if(acceptableMethods.indexOf(data.method) > -1){
+        handlers._checks[data.method](data,callback);
+    } else {
+        callback(405);
+    }
+};
 
+// Container for all the checks methods 
+handlers._checks = {}
 
+// Building the check post function 
+// required data :- protocol, url, method, successCodes, timeoutSeconds 
+// Optional data : none 
+
+handlers._checks.post = function(data,callback){
+    // validate all the inputs 
+    var payload = (data.payload);
+    var protocol = typeof(payload.protocol) == 'string' && ['https','http'].indexOf(payload.protocol) > -1 ? payload.protocol : false ;
+    var url = typeof(payload.url) == 'string' && payload.url.trim().length > 0? payload.url.trim() : false ;
+    var method = typeof(payload.method) == 'string' && ['post','get','put','delete'].indexOf(payload.method) > -1 ? payload.method : false ;
+    var successCodes = typeof(payload.successCodes) == 'object' && payload.successCodes instanceof Array && payload.successCodes.length > 0? payload.successCodes : false ;
+    var timeoutSeconds = typeof(payload.timeoutSeconds) == 'number' && payload.timeoutSeconds % 1 === 0 && payload.timeoutSeconds >=1 && payload.timeoutSeconds <=5 ? payload.timeoutSeconds : false ;
+    // If the information is valid then 
+    if(protocol && url && method && successCodes && timeoutSeconds){
+        // Get the token from the headers 
+        var token = typeof(data.headers.token) == 'string' ? data.headers.token : false;
+        
+        // Now lookup the uiser by reading the token 
+        _data.read('tokens',token,function(err, tokenData){
+            if(!err && tokenData){
+                var userPhone = tokenData.phone;
+                // Lookup the user data 
+                _data.read('users',userPhone,function(err,userData){
+                    if(!err && userData){
+                        // check the user checks 
+                        var userChecks = typeof(userData.checks) == 'object' && userData.checks instanceof Array ? userData.checks : [];
+                        // Verify the user has less than the max number of checks 
+                        if(userChecks.length< config.maxChecks){
+                            // create the random id for the checks 
+                            var checkId = helpers.createRandomString(20);
+
+                            // Create the check object and include the users phone number
+                            // Do it the nosql way 
+                            var checkObject = {
+                                'id' : checkId,
+                                'userPhone': userPhone,
+                                'protocol' : protocol,
+                                'url' : url,
+                                'method' : method,
+                                'successCodes' :successCodes,
+                                'timeoutSeconds' : timeoutSeconds
+                            };
+
+                            // store the obejct in the data folder `
+                            _data.create('checks', checkId,checkObject, function(err){
+                                if(!err){
+                                    userData.checks = userChecks;
+                                    userData.checks.push(checkId);
+
+                                    // now update the user object
+                                    _data.update('users', userPhone,userData,function(err){
+                                        if(!err) {
+                                            // Return the data about the new check 
+                                            callback(200, checkObject);
+                                            
+                                        } else {
+                                            callback(500, {'Error': 'Could not update the user with the new check'});
+                                        }
+                                    });
+                                } else {
+                                    callback(500,{'Error' : "Could notcreate check"});
+                                }
+                            });
+                        } else {
+                            callback(400, {'Error' :'The max number of checks per user ('+ config.maxChecks +') has been reached'});
+
+                        }
+                    } else {
+                        callback(403);
+                    }
+                });
+            } else {
+                callback(403);
+            }
+        });
+    } else {
+        callback(400, {'Error' : timeoutSeconds });
+    }
+
+};
 
 // export the module 
 module.exports = handlers;
